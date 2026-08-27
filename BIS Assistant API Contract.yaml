@@ -1,0 +1,1321 @@
+openapi: 3.0.3
+
+info:
+  title: BIS Intelligent Conversational Assistant API
+  version: 1.0.0
+  description: |
+    API contract for an AI-powered conversational assistant for
+    Indian Standards and BIS services.
+
+    The assistant accepts natural-language queries and can:
+
+      - Answer questions about Indian Standards and BIS services
+      - Recommend potentially applicable standards for products
+      - Provide source-backed responses
+      - Return structured data cards for standards, certifications,
+        laboratories, and BIS services
+      - Ask clarification questions when insufficient information
+        is available to answer reliably
+      - Support multilingual conversational interaction
+
+    The backend may combine structured database retrieval,
+    document retrieval/RAG, and LLM-based response generation.
+
+    These implementation details are intentionally not exposed
+    through the API contract.
+
+servers:
+  - url: /api/v1
+    description: API Version 1
+
+tags:
+  - name: Health
+    description: Application health
+
+  - name: Chat
+    description: Conversational BIS assistant
+
+paths:
+
+  # ============================================================
+  # HEALTH
+  # ============================================================
+
+  /health:
+    get:
+      tags:
+        - Health
+
+      summary: Check API health
+
+      description: |
+        Returns the current health status of the API.
+
+        The response data is intentionally a plain text message
+        rather than a structured object.
+
+      operationId: healthCheck
+
+      responses:
+
+        '200':
+          description: API is healthy
+
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+              example:
+                success: true
+                data: "BIS Assistant API is healthy."
+                error: null
+
+        '500':
+          description: Internal server error
+
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+              example:
+                success: false
+                data: null
+                error:
+                  type: "INTERNAL_SERVER_ERROR"
+                  message: "An unexpected error occurred."
+                  status_code: 500
+
+
+  # ============================================================
+  # CHAT
+  # ============================================================
+
+  /query:
+    post:
+      tags:
+        - Chat
+
+      summary: Ask the BIS conversational assistant a question
+
+      description: |
+        Accepts a natural-language user query and returns either:
+
+        1. An answer containing source-backed information and
+           optional structured data cards.
+
+        2. A clarification response containing questions that
+           must be answered before the assistant can provide
+           a reliable answer.
+
+        The same endpoint is used for both initial queries and
+        subsequent clarification answers.
+
+        Conversation continuity is maintained using conversation_id.
+        The frontend must send the conversation_id returned by the
+        server when submitting subsequent messages.
+
+      operationId: chat
+
+      requestBody:
+        required: true
+
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+
+            examples:
+
+              initial_query:
+                summary: Initial user query
+
+                value:
+                  conversation_id: null
+
+                  message:
+                    content: |
+                      What BIS standard applies to PVC insulated
+                      electrical cables rated up to 1100V?
+
+                    language: "en"
+
+
+              clarification_answer:
+                summary: Answer to clarification questions
+
+                value:
+                  conversation_id: "conv_01HXYZ123"
+
+                  message:
+                    content: |
+                      What is the rated voltage of your wire?
+		      1100
+
+                      What is the conductor of your wire?
+  		      Copper
+
+                    language: "en"
+
+      responses:
+
+        # ========================================================
+        # 200
+        # ========================================================
+
+        '200':
+          description: |
+            Successful response.
+
+            The response may contain either an answer or a
+            clarification request.
+
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+              examples:
+
+                # ------------------------------------------------
+                # ANSWER
+                # ------------------------------------------------
+
+                answer:
+                  summary: Answer with standard card and citation
+
+                  value:
+
+                    success: true
+
+                    data:
+
+                      message_type: "answer"
+
+                      conversation_id: "conv_01HXYZ123"
+
+                      message: |
+                        For PVC insulated cables rated up to
+                        1100 V, IS 694:2010 is a relevant
+                        Indian Standard <cit_1>.
+
+                      citations:
+
+                        - id: "cit_1"
+                          source_type: "standard"
+                          title: "IS 694:2010"
+                          reference: "IS 694:2010"
+                          source_url: "https://standards.bis.gov.in/..."
+
+                      data:
+
+                        - data_type: "standard"
+
+                          id: "std_001"
+
+                          is_number: "IS 694:2010"
+
+                          title: |
+                            Polyvinyl chloride insulated unsheathed
+                            and sheathed cables/cords with rigid and
+                            flexible conductor for rated voltages up
+                            to and including 1 100 V
+
+                          revision_number: 4
+
+                          publication_year: 2010
+
+                          status: "Active"
+
+                          technical_department: |
+                            Electrotechnical Department (ETD)
+
+                          relevance: "Primary"
+
+                          applicable_when: |
+                            PVC insulated cables rated up to
+                            and including 1100 V.
+
+                          source_url: "https://standards.bis.gov.in/..."
+
+                          document_url: "https://standardsbis.bsbedge.com/..."
+
+                    error: null
+
+
+                # ------------------------------------------------
+                # CLARIFICATION
+                # ------------------------------------------------
+
+                clarification:
+                  summary: Clarification request
+
+                  value:
+
+                    success: true
+
+                    data:
+
+                      message_type: "clarification"
+
+                      conversation_id: "conv_01HXYZ123"
+
+                      message: |
+                        I need a few more details to identify
+                        the applicable standard reliably.
+
+                      questions:
+
+                        - id: "q_voltage"
+
+                          question: |
+                            What is the rated voltage of the cable?
+
+                          input_type: "number"
+
+                          required: true
+
+
+                        - id: "q_conductor"
+
+                          question: |
+                            What type of conductor does the
+                            cable use?
+
+                          input_type: "select"
+
+                          required: true
+
+                          options:
+                            - "Copper"
+                            - "Aluminium"
+                            - "Other"
+
+                      citations: []
+
+                      data: []
+
+                    error: null
+
+
+                # ------------------------------------------------
+                # CLARIFICATION FOLLOW-UP
+                # ------------------------------------------------
+
+                clarification_follow_up:
+                  summary: Response after clarification submission
+
+                  value:
+
+                    success: true
+
+                    data:
+
+                      message_type: "answer"
+
+                      conversation_id: "conv_01HXYZ123"
+
+                      message: |
+                        You specified the following:
+
+                        What is the rated voltage of the cable?
+                        1100V
+
+                        What type of conductor does the cable use?
+                        Copper
+
+                        Based on these details, IS 694:2010 is
+                        applicable <cit_1>.
+
+                      citations:
+
+                        - id: "cit_1"
+                          source_type: "standard"
+                          title: "IS 694:2010"
+                          reference: "IS 694:2010"
+                          source_url: "https://standards.bis.gov.in/..."
+
+                      data:
+
+                        - data_type: "standard"
+
+                          id: "std_001"
+
+                          is_number: "IS 694:2010"
+
+                          title: |
+                            Polyvinyl chloride insulated unsheathed
+                            and sheathed cables/cords with rigid and
+                            flexible conductor...
+
+                          revision_number: 4
+
+                          publication_year: 2010
+
+                          status: "Active"
+
+                          technical_department: |
+                            Electrotechnical Department (ETD)
+
+                          relevance: "Primary"
+
+                          applicable_when: |
+                            PVC insulated cables rated up to
+                            and including 1100 V.
+
+                          source_url: "https://standards.bis.gov.in/..."
+
+                          document_url: "https://standardsbis.bsbedge.com/..."
+
+                      error: null
+
+
+        # ========================================================
+        # 400
+        # ========================================================
+
+        '400':
+          description: Invalid request
+
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+              example:
+
+                success: false
+
+                data: null
+
+                error:
+
+                  type: "VALIDATION_ERROR"
+
+                  message: "The message content is required."
+
+                  status_code: 400
+
+                  fields:
+
+                    - field: "message.content"
+
+                      message: "Field required."
+
+
+        # ========================================================
+        # 404
+        # ========================================================
+
+        '404':
+          description: Conversation not found
+
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+              example:
+
+                success: false
+
+                data: null
+
+                error:
+
+                  type: "CONVERSATION_NOT_FOUND"
+
+                  message: |
+                    The requested conversation could not be found.
+
+                  status_code: 404
+
+
+        # ========================================================
+        # 422
+        # ========================================================
+
+        '422':
+          description: Unable to process the request
+
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+              example:
+
+                success: false
+
+                data: null
+
+                error:
+
+                  type: "PROCESSING_ERROR"
+
+                  message: |
+                    The request could not be processed.
+
+                  status_code: 422
+
+
+        # ========================================================
+        # 500 - DATABASE
+        # ========================================================
+
+        '500':
+          description: |
+            Internal server error.
+
+            This may occur when the backend cannot access or
+            retrieve the required structured data from the database.
+
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+              examples:
+
+                database_error:
+
+                  summary: Database error
+
+                  value:
+
+                    success: false
+
+                    data: null
+
+                    error:
+
+                      type: "DATABASE_ERROR"
+
+                      message: |
+                        The requested information could not be
+                        retrieved because of a database error.
+
+                      status_code: 500
+
+
+                internal_error:
+
+                  summary: Unexpected internal error
+
+                  value:
+
+                    success: false
+
+                    data: null
+
+                    error:
+
+                      type: "INTERNAL_SERVER_ERROR"
+
+                      message: |
+                        An unexpected error occurred.
+
+                      status_code: 500
+
+
+components:
+
+  schemas:
+
+    # ============================================================
+    # HEALTH RESPONSE
+    # ============================================================
+
+    HealthResponse:
+      type: object
+
+      required:
+        - success
+        - data
+        - error
+
+      properties:
+
+        success:
+          type: boolean
+          enum:
+            - true
+
+        data:
+          type: string
+          description: Plain text health status message.
+
+          example: "BIS Assistant API is healthy."
+
+        error:
+          nullable: true
+          example: null
+
+
+    # ============================================================
+    # REQUEST
+    # ============================================================
+
+    ChatRequest:
+
+      type: object
+
+      required:
+        - message
+
+      properties:
+
+        conversation_id:
+          type: string
+          nullable: true
+
+          description: |
+            Identifier of the ongoing conversation.
+
+            Null or omitted for a new conversation.
+
+            For subsequent messages, the frontend must send the
+            conversation_id returned by the previous response.
+
+            The backend uses this identifier to retrieve the
+            previous conversation context.
+
+          example: "conv_01HXYZ123"
+
+
+        message:
+          $ref: '#/components/schemas/UserMessage'
+
+
+    # ============================================================
+    # USER MESSAGE
+    # ============================================================
+
+    UserMessage:
+
+      type: object
+
+      required:
+        - content
+
+      properties:
+
+        content:
+          type: string
+
+          minLength: 1
+
+          description: |
+            Natural-language user message.
+
+            For normal queries this contains the user's question.
+
+            For clarification follow-ups this contains the user's
+            answers to the clarification questions.
+
+          example: |
+            Which BIS standard applies to my PVC cable?
+
+
+        language:
+          type: string
+
+          nullable: true
+
+          description: |
+            ISO 639-1 language code when known.
+
+            The frontend may provide the language selected by the
+            user.
+
+            If omitted, the backend may automatically detect the
+            language from the message.
+
+          example: "en"
+
+
+    # ============================================================
+    # SUCCESS ENVELOPE
+    # ============================================================
+
+    SuccessResponse:
+
+      type: object
+
+      required:
+        - success
+        - data
+        - error
+
+      properties:
+
+        success:
+          type: boolean
+
+          enum:
+            - true
+
+
+        data:
+          $ref: '#/components/schemas/ChatResponse'
+
+
+        error:
+          nullable: true
+
+          example: null
+
+
+    # ============================================================
+    # CHAT RESPONSE
+    # ============================================================
+
+    ChatResponse:
+
+      type: object
+
+      required:
+        - message_type
+        - conversation_id
+        - message
+        - citations
+        - data
+
+      properties:
+
+        message_type:
+          type: string
+
+          description: |
+            Determines how the frontend should interpret the
+            response.
+
+          enum:
+            - answer
+            - clarification
+
+          example: "answer"
+
+
+        conversation_id:
+          type: string
+
+          description: |
+            Identifier of the current conversation.
+
+            The frontend must preserve this identifier and send
+            it with subsequent requests belonging to the same
+            conversation.
+
+          example: "conv_01HXYZ123"
+
+
+        message:
+          type: string
+
+          description: |
+            Natural-language response generated by the assistant.
+
+            Citations are embedded directly inside the message
+            using identifiers in the form <cit_id>.
+
+            The frontend can replace each citation identifier
+            with the corresponding citation UI element.
+
+          example: |
+            IS 694:2010 applies to PVC insulated cables rated
+            up to and including 1100 V <cit_1>.
+
+
+        citations:
+          type: array
+
+          description: |
+            Sources referenced by citation identifiers embedded
+            inside the message.
+
+          items:
+            $ref: '#/components/schemas/Citation'
+
+
+        data:
+          type: array
+
+          description: |
+            Structured data returned for frontend rendering.
+
+            Each object is a flattened data card.
+
+            The data_type field determines which frontend
+            component should render the object.
+
+            A single response may contain multiple data types.
+
+          items:
+            $ref: '#/components/schemas/DataBlock'
+
+
+        questions:
+          type: array
+
+          nullable: true
+
+          description: |
+            Present when message_type is "clarification".
+
+            Contains the structured questions that the frontend
+            should present to the user.
+
+            This field is normally null or omitted for normal
+            answer responses.
+
+          items:
+            $ref: '#/components/schemas/ClarificationQuestion'
+
+
+    # ============================================================
+    # CITATIONS
+    # ============================================================
+
+    Citation:
+
+      type: object
+
+      required:
+        - id
+        - source_type
+        - title
+        - source_url
+
+      properties:
+
+        id:
+          type: string
+
+          description: |
+            Citation identifier referenced inside the message
+            using <cit_id> syntax.
+
+          example: "cit_1"
+
+
+        source_type:
+          type: string
+
+          description: Type of authoritative source.
+
+          enum:
+            - standard
+            - certification
+            - laboratory
+            - service
+            - document
+            - other
+
+          example: "standard"
+
+
+        title:
+          type: string
+
+          description: Human-readable source title.
+
+          example: "IS 694:2010"
+
+
+        reference:
+          type: string
+
+          nullable: true
+
+          description: |
+            Formal source reference when available.
+
+          example: "IS 694:2010"
+
+
+        source_url:
+          type: string
+
+          format: uri
+
+          description: |
+            Direct URL to the authoritative source.
+
+          example: "https://standards.bis.gov.in/..."
+
+
+    # ============================================================
+    # DATA BLOCK
+    # ============================================================
+
+    DataBlock:
+
+      type: object
+
+      required:
+        - data_type
+        - id
+
+      description: |
+        Flattened frontend data card.
+
+        The fields used by a particular card depend on data_type.
+
+        data_type is used as the discriminator by the frontend.
+
+      properties:
+
+        data_type:
+          type: string
+
+          description: |
+            Determines which frontend card/component should
+            render the object.
+
+          enum:
+            - standard
+            - certification
+            - laboratory
+            - service
+
+          example: "standard"
+
+
+        id:
+          type: string
+
+          description: Identifier of the database entity.
+
+          example: "std_001"
+
+
+        # --------------------------------------------------------
+        # STANDARD FIELDS
+        # --------------------------------------------------------
+
+        is_number:
+          type: string
+          nullable: true
+
+          example: "IS 694:2010"
+
+
+        title:
+          type: string
+          nullable: true
+
+          example: |
+            Polyvinyl chloride insulated unsheathed and sheathed
+            cables/cords with rigid and flexible conductor...
+
+
+        revision_number:
+          type: integer
+          nullable: true
+
+          example: 4
+
+
+        publication_year:
+          type: integer
+          nullable: true
+
+          example: 2010
+
+
+        status:
+          type: string
+          nullable: true
+
+          example: "Active"
+
+
+        technical_department:
+          type: string
+          nullable: true
+
+          example: "Electrotechnical Department (ETD)"
+
+
+        relevance:
+          type: string
+          nullable: true
+
+          description: |
+            Query-specific relevance assigned to a returned
+            standard.
+
+            This is presentation-level information and does not
+            necessarily need to be stored in the standards table.
+
+          enum:
+            - Primary
+            - Supporting
+            - Related
+
+
+        applicable_when:
+          type: string
+          nullable: true
+
+          description: |
+            Query-specific explanation describing when the
+            returned standard may apply.
+
+            This can be generated from retrieved database records,
+            mappings, and/or authoritative RAG documents.
+
+
+        # --------------------------------------------------------
+        # CERTIFICATION FIELDS
+        # --------------------------------------------------------
+
+        name:
+          type: string
+          nullable: true
+
+          example: "Scheme I (ISI Mark Scheme)"
+
+
+        scheme_code:
+          type: string
+          nullable: true
+
+          example: "Scheme-I"
+
+
+        certification_type:
+          type: string
+          nullable: true
+
+          example: "Product Certification"
+
+
+        mandatory:
+          type: string
+          nullable: true
+
+          example: "Yes for products covered by applicable QCOs"
+
+
+        authority:
+          type: string
+          nullable: true
+
+          example: "Bureau of Indian Standards"
+
+
+        requirements:
+          type: array
+
+          nullable: true
+
+          description: |
+            Requirements relevant to the user's query.
+
+            These may be assembled from structured database
+            records and/or retrieved authoritative documents.
+
+          items:
+            type: string
+
+
+        # --------------------------------------------------------
+        # LABORATORY FIELDS
+        # --------------------------------------------------------
+
+        lab_code:
+          type: string
+          nullable: true
+
+          example: "6104524"
+
+
+        address:
+          type: string
+          nullable: true
+
+
+        state:
+          type: string
+          nullable: true
+
+          example: "Tamil Nadu"
+
+
+        district:
+          type: string
+          nullable: true
+
+          example: "Thiruvallur"
+
+
+        phone:
+          type: string
+          nullable: true
+
+
+        email:
+          type: string
+          format: email
+          nullable: true
+
+
+        validity_date:
+          type: string
+          format: date
+          nullable: true
+
+
+        scope:
+          type: string
+          nullable: true
+
+          description: |
+            Laboratory testing scope published by the source.
+
+
+        # --------------------------------------------------------
+        # SERVICE FIELDS
+        # --------------------------------------------------------
+
+        service_type:
+          type: string
+          nullable: true
+
+          example: "Product Certification"
+
+
+        description:
+          type: string
+          nullable: true
+
+
+        # --------------------------------------------------------
+        # COMMON SOURCE FIELDS
+        # --------------------------------------------------------
+
+        source_url:
+          type: string
+
+          format: uri
+
+          nullable: true
+
+          description: |
+            Direct URL to the authoritative source.
+
+            The frontend may use this URL for a "Source",
+            "View Standard", "View Lab", "View Certification",
+            or similar action depending on data_type.
+
+
+        document_url:
+          type: string
+
+          format: uri
+
+          nullable: true
+
+          description: |
+            Direct URL to an authoritative document when
+            separately available.
+
+
+    # ============================================================
+    # CLARIFICATION QUESTION
+    # ============================================================
+
+    ClarificationQuestion:
+
+      type: object
+
+      required:
+        - id
+        - question
+        - input_type
+        - required
+
+      properties:
+
+        id:
+          type: string
+
+          description: |
+            Identifier of the clarification question.
+
+            The frontend uses this identifier when associating
+            the user's answer with the question.
+
+          example: "q_voltage"
+
+
+        question:
+          type: string
+
+          description: |
+            Question displayed to the user.
+
+          example: |
+            What is the rated voltage of the cable?
+
+
+        input_type:
+          type: string
+
+          description: |
+            Input component that the frontend should render.
+
+          enum:
+            - text
+            - number
+            - select
+            - multi_select
+            - boolean
+
+          example: "number"
+
+
+        required:
+          type: boolean
+
+          description: |
+            Whether the user must provide an answer.
+
+          example: true
+
+
+        options:
+          type: array
+
+          nullable: true
+
+          description: |
+            Available options for select and multi_select inputs.
+
+            This field is only relevant when input_type is
+            select or multi_select.
+
+          items:
+            type: string
+
+          example:
+            - "Copper"
+            - "Aluminium"
+            - "Other"
+
+
+    # ============================================================
+    # ERROR ENVELOPE
+    # ============================================================
+
+    ErrorResponse:
+
+      type: object
+
+      required:
+        - success
+        - data
+        - error
+
+      properties:
+
+        success:
+          type: boolean
+
+          enum:
+            - false
+
+
+        data:
+          nullable: true
+
+          example: null
+
+
+        error:
+          $ref: '#/components/schemas/ErrorObject'
+
+
+    # ============================================================
+    # ERROR OBJECT
+    # ============================================================
+
+    ErrorObject:
+
+      type: object
+
+      required:
+        - type
+        - message
+        - status_code
+
+      properties:
+
+        type:
+          type: string
+
+          description: |
+            Machine-readable error type.
+
+          example: "VALIDATION_ERROR"
+
+
+        message:
+          type: string
+
+          description: |
+            Human-readable error message.
+
+          example: |
+            The message content is required.
+
+
+        status_code:
+          type: integer
+
+          description: HTTP status code associated with the error.
+
+          example: 400
+
+
+        fields:
+          type: array
+
+          nullable: true
+
+          description: |
+            Field-level validation errors.
+
+            Usually present for validation-related errors.
+
+          items:
+            $ref: '#/components/schemas/FieldError'
+
+
+    # ============================================================
+    # FIELD ERROR
+    # ============================================================
+
+    FieldError:
+
+      type: object
+
+      required:
+        - field
+        - message
+
+      properties:
+
+        field:
+          type: string
+
+          example: "message.content"
+
+
+        message:
+          type: string
+
+          example: "Field required."
