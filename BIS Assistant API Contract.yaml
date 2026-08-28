@@ -150,11 +150,7 @@ paths:
 
                   message:
                     content: |
-                      What is the rated voltage of your wire?
-		      1100
-
-                      What is the conductor of your wire?
-  		      Copper
+                      What is the rated voltage of your wire?\n1100\n\nWhat is the conductor of your wire?\nCopper
 
                     language: "en"
 
