@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field, computed_field
+from pydantic import AliasChoices, Field, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -34,7 +34,10 @@ class BaseAppSettings(BaseSettings):
     # AI Settings
     # ------------------------------------------------------------------
 
-    AI_MODEL: Literal["FAKE", "OLLAMA"] = Field(default="OLLAMA")
+    AI_PROVIDER: str = Field(
+        default="OLLAMA",
+        validation_alias=AliasChoices("AI_PROVIDER", "AI_BACKEND")
+    )
 
     # Ollama server URL.
     #
@@ -45,12 +48,20 @@ class BaseAppSettings(BaseSettings):
     #   https://<your-tunnel>.trycloudflare.com
     #
     MODEL_URL: str = Field(
-        default="http://localhost:11434"
+        default="http://localhost:11434",
+        validation_alias=AliasChoices("MODEL_URL", "AI_BASE_URL")
     )
 
     MODEL_NAME: str = Field(
-        default="your-ollama-model"
+        default="qwen:8b",
+        validation_alias=AliasChoices("MODEL_NAME", "AI_MODEL")
     )
+
+    @property
+    def AI_MODEL(self) -> str:
+        """Normalized AI provider name ('FAKE' or 'OLLAMA') for AIEngine."""
+        val = self.AI_PROVIDER.upper()
+        return val if val in ("FAKE", "OLLAMA") else "OLLAMA"
 
     # ------------------------------------------------------------------
     # Embeddings

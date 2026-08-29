@@ -1,7 +1,7 @@
 from flask import request
 
 from . import v1_bp
-from validators.chat_responses import ChatRequest
+from validators.chat_responses import ChatRequest, ChatResponse
 
 from services.query.query_service import process_query
 from utils.response_envelopes import create_success_response
@@ -10,6 +10,6 @@ from utils.response_envelopes import create_success_response
 def query_endpoint():
     payload = ChatRequest(**request.json())
 
-    result = process_query(payload.message)
+    result = process_query(payload)
 
-    return create_success_response(result)
+    return create_success_response(ChatResponse(result))

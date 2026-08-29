@@ -3,11 +3,6 @@ from typing import Any
 from pydantic import BaseModel
 from polyfactory.factories.pydantic_factory import ModelFactory
 
-from typing import Any
-
-from pydantic import BaseModel
-from polyfactory.factories.pydantic_factory import ModelFactory
-
 
 class FakeProvider:
     """A fake provider that generates fake data based on a given response schema."""
@@ -15,7 +10,8 @@ class FakeProvider:
     def generate(
         self,
         prompt: str,
-        response_schema: type[BaseModel]
+        response_schema: type[BaseModel],
+        generation_options: dict[str, Any] | None = None
     ) -> dict[str, Any]:
 
         generation_options = generation_options or {}
