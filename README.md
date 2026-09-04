@@ -61,63 +61,79 @@ The diagram below illustrates the end-to-end processing pipeline—from the raw 
 ```mermaid
 flowchart TD
     subgraph Client["1. Client Layer"]
-        A[User Query / Chat Message]
+        A["User Query / Chat Message"]
     end
 
     subgraph Analysis["2. Query Analysis & Intent Extraction"]
-        A --> B[Query Analyzer]
-        B --> B1[LLM Analysis / Heuristic Fallback]
-        B1 --> C[Structured QueryPlan]
-        C -.-> C1["Intent: PRODUCT_MAPPING, SERVICE_LOOKUP, TECHNICAL_QUESTION, etc."]
+        A --> B["Query Analyzer"]
+        B --> B1["LLM Analysis / Heuristic Fallback"]
+        B1 --> C["Structured QueryPlan"]
+        C -.-> C1["Intent: PRODUCT_MAPPING, SERVICE_LOOKUP,<br/>TECHNICAL_QUESTION, etc."]
         C -.-> C2["Language: en, hi, hinglish"]
-        C -.-> C3["Normalized Query & Extracted Parameters"]
+        C -.-> C3["Normalized Query &<br/>Extracted Parameters"]
     end
 
     subgraph Planning["3. Deterministic Retrieval Planner"]
-        C --> D{Intent-to-Retrieval Compatibility Matrix}
-        D -->|Needs Relational Data| D1[Schedule DB Operations]
-        D -->|Needs Technical Specs| D2[Schedule RAG Vector Search]
-        D -->|Service/Lab Lookup| D3[Gatekeep: Disable Irrelevant RAG]
+        C --> D{"Intent-to-Retrieval<br/>Compatibility Matrix"}
+        D -->|Needs Relational Data| D1["Schedule DB Operations"]
+        D -->|Needs Technical Specs| D2["Schedule RAG Vector Search"]
+        D -->|Service/Lab Lookup| D3["Gatekeep: Disable Irrelevant RAG"]
     end
 
     subgraph Retrieval["4. Query Execution Layer"]
-        D1 --> E[(PostgreSQL Relational DB)]
-        E --> E1[Products, Standards, Services, Labs]
-        D2 --> F[(pgvector Vector Store)]
-        F --> F1[Cosine Similarity on Standard Document Chunks]
+        D1 --> E[("PostgreSQL<br/>Relational DB")]
+        E --> E1["Products, Standards,<br/>Services, Labs"]
+        D2 --> F[("pgvector<br/>Vector Store")]
+        F --> F1["Cosine Similarity on<br/>Standard Document Chunks"]
     end
 
     subgraph Assembly["5. Evidence Assembly & Filtering"]
-        E1 --> G[Evidence Assembler]
+        E1 --> G["Evidence Assembler"]
         F1 --> G
         D3 -.-> G
-        G --> H1[Structured DataCards]
-        G --> H2[Filtered Relevant Citations]
+        G --> H1["Structured DataCards"]
+        G --> H2["Filtered Relevant Citations"]
     end
 
     subgraph Synthesis["6. Response Synthesis Layer"]
-        H1 --> I[Prompt Builder: services/query/synthesis_prompt.py]
+        H1 --> I["Prompt Builder:<br/>services/query/synthesis_prompt.py"]
         H2 --> I
         C2 --> I
-        I --> J[LLM Structured Synthesis]
-        J --> K[Validated SynthesisResponse]
+        I --> J["LLM Structured Synthesis"]
+        J --> K["Validated SynthesisResponse"]
     end
 
     subgraph Delivery["7. API Delivery & Persistence"]
-        K --> L[API Response Envelope]
-        L --> M[PostgreSQL Conversation Store]
-        L --> N[JSON Client Output]
+        K --> L["API Response Envelope"]
+        L --> M[("PostgreSQL<br/>Conversation Store")]
+        L --> N["JSON Client Output"]
     end
 
-    classDef client fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
-    classDef step fill:#f3e5f5,stroke:#7b1fa2,stroke-width:1px;
-    classDef db fill:#e8f5e9,stroke:#388e3c,stroke-width:2px;
-    classDef proc fill:#fff3e0,stroke:#f57c00,stroke-width:1px;
+    %% ---------- Node Styles ----------
+
+    classDef client fill:#E3F2FD,stroke:#0277BD,stroke-width:3px,color:#0D1B2A,font-size:18px,font-weight:bold;
+    classDef step fill:#F3E5F5,stroke:#6A1B9A,stroke-width:2px,color:#1A1025,font-size:17px,font-weight:bold;
+    classDef db fill:#E8F5E9,stroke:#2E7D32,stroke-width:3px,color:#102014,font-size:17px,font-weight:bold;
+    classDef proc fill:#FFF3E0,stroke:#EF6C00,stroke-width:2px,color:#25170A,font-size:17px,font-weight:bold;
 
     class A,N client;
     class B,B1,C,D,G,I,J,K,L step;
     class E,F,M db;
     class D1,D2,D3,H1,H2 proc;
+
+    %% ---------- Subgraph Styling ----------
+
+    style Client fill:#F8FBFF,stroke:#0277BD,stroke-width:3px,color:#0D1B2A
+    style Analysis fill:#FCF8FD,stroke:#6A1B9A,stroke-width:3px,color:#1A1025
+    style Planning fill:#FCF9F5,stroke:#EF6C00,stroke-width:3px,color:#25170A
+    style Retrieval fill:#F7FCF8,stroke:#2E7D32,stroke-width:3px,color:#102014
+    style Assembly fill:#FCF9F5,stroke:#EF6C00,stroke-width:3px,color:#25170A
+    style Synthesis fill:#FCF8FD,stroke:#6A1B9A,stroke-width:3px,color:#1A1025
+    style Delivery fill:#F8FBFF,stroke:#0277BD,stroke-width:3px,color:#0D1B2A
+
+    %% ---------- Link Styling ----------
+
+    linkStyle default stroke:#374151,stroke-width:2px;
 ```
 
 ---
