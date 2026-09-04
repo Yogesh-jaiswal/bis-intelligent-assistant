@@ -1,4 +1,5 @@
 import logging
+import time
 from typing import Any
 
 from services.query_analyser.analyser_schema import DatabaseOperation, QueryPlan
@@ -58,6 +59,7 @@ class QueryExecutor:
         """
         # Step 1: Check relevance
         if not plan.relevant:
+            logger.info("[EXECUTOR] Skipped execution: query plan marked not relevant")
             return QueryExecutionResult(
                 executed=False,
                 status=ExecutionStatus.SKIPPED_NOT_RELEVANT,
@@ -69,6 +71,7 @@ class QueryExecutor:
 
         # Step 2: Check if database retrieval is required
         if not plan.needs_db or not plan.db_operations:
+            logger.info("[EXECUTOR] Skipped execution: needs_db is False or db_operations list is empty")
             return QueryExecutionResult(
                 executed=False,
                 status=ExecutionStatus.SKIPPED_DB_NOT_REQUIRED,
@@ -83,31 +86,50 @@ class QueryExecutor:
         operations_executed: list[DatabaseOperation] = []
         derived_params: dict[str, Any] = dict(plan.parameters or {})
 
+        logger.info(
+            "[EXECUTOR: START] Executing %d database operations: %s with initial params: %s",
+            len(plan.db_operations),
+            [op.value if isinstance(op, DatabaseOperation) else str(op) for op in plan.db_operations],
+            derived_params,
+        )
+
         # Step 3: Execute each operation in plan.db_operations
         for op in plan.db_operations:
             handler = self._dispatch_map.get(op)
             op_key = op.value if isinstance(op, DatabaseOperation) else str(op)
 
             if not handler:
-                errors[op_key] = f"Database operation '{op}' is not supported."
+                msg = f"Database operation '{op}' is not supported."
+                logger.warning("[EXECUTOR: UNSUPPORTED] %s", msg)
+                errors[op_key] = msg
                 continue
 
             try:
+                op_start = time.perf_counter()
                 op_records, op_skipped = handler(derived_params, plan)
+                op_ms = (time.perf_counter() - op_start) * 1000.0
 
                 if op_skipped:
+                    logger.info("[EXECUTOR: OP SKIPPED] Operation '%s' skipped due to missing required params", op_key)
                     continue
 
                 results[op_key] = op_records
                 operations_executed.append(op)
+                logger.info(
+                    "[EXECUTOR: OP COMPLETED] '%s' executed in %.2f ms -> returned %d records",
+                    op_key,
+                    op_ms,
+                    len(op_records),
+                )
 
                 # Parameter Derivation: enrich derived_params for downstream operations
-                if op == DatabaseOperation.FIND_APPLICABLE_STANDARDS or op == DatabaseOperation.FIND_STANDARD:
+                if op in (DatabaseOperation.FIND_APPLICABLE_STANDARDS, DatabaseOperation.FIND_STANDARD):
                     if op_records and "standard_number" not in derived_params:
                         first_std = op_records[0].get("is_number")
                         if first_std:
                             derived_params["standard_number"] = first_std
                             derived_params["is_number"] = first_std
+                            logger.info("[EXECUTOR: PARAM DERIVED] Derived standard_number='%s' for downstream operations", first_std)
 
                 elif op == DatabaseOperation.FIND_PRODUCT:
                     if op_records and "product" not in derived_params:
@@ -115,11 +137,11 @@ class QueryExecutor:
                         if first_prod:
                             derived_params["product"] = first_prod
                             derived_params["product_name"] = first_prod
+                            logger.info("[EXECUTOR: PARAM DERIVED] Derived product='%s' for downstream operations", first_prod)
 
             except Exception as e:
-                logger.exception(f"Error executing database operation '{op}'")
+                logger.error("[EXECUTOR: OP ERROR] Error executing database operation '%s': %s", op_key, e, exc_info=True)
                 errors[op_key] = str(e)
-                # Note: We continue loop so other operations can still succeed!
 
         # Step 4: Determine overall status
         total_records = sum(len(recs) for recs in results.values())
@@ -128,11 +150,13 @@ class QueryExecutor:
         if executed_count == 0:
             if errors:
                 status = ExecutionStatus.ERROR
+                executed = True
             elif plan.missing_information:
                 status = ExecutionStatus.SKIPPED_MISSING_REQUIRED_PARAMS
+                executed = False
             else:
                 status = ExecutionStatus.SKIPPED_DB_NOT_REQUIRED
-            executed = False
+                executed = False
         else:
             executed = True
             if errors:
@@ -141,6 +165,14 @@ class QueryExecutor:
                 status = ExecutionStatus.SUCCESS
             else:
                 status = ExecutionStatus.NO_RECORDS_FOUND
+
+        logger.info(
+            "[EXECUTOR: COMPLETE] Executed %d operations | Total records found: %d | Status: %s | Errors: %s",
+            executed_count,
+            total_records,
+            status.value,
+            list(errors.keys()) if errors else "None",
+        )
 
         return QueryExecutionResult(
             executed=executed,
@@ -162,9 +194,8 @@ class QueryExecutor:
 
     def _execute_find_standard(self, params: dict[str, Any], plan: QueryPlan) -> tuple[list[dict[str, Any]], bool]:
         std_num = params.get("standard_number") or params.get("is_number")
-        title = params.get("title") or params.get("keyword")
+        title = params.get("title") or params.get("keyword") or (plan.normalized_query if not std_num and not plan.missing_information else None)
 
-        # Skip if mandatory identification parameter is missing
         if not std_num and not title and plan.missing_information:
             return [], True
 
@@ -180,7 +211,10 @@ class QueryExecutor:
     def _execute_find_product(self, params: dict[str, Any], plan: QueryPlan) -> tuple[list[dict[str, Any]], bool]:
         name = params.get("product") or params.get("name") or params.get("product_name")
         category = params.get("category") or params.get("product_category")
-        keyword = params.get("keyword")
+        keyword = params.get("keyword") or (plan.normalized_query if not name and not category and not plan.missing_information else None)
+
+        if not name and not category and not keyword and plan.missing_information:
+            return [], True
 
         data = self.product_repo.find_product(
             name=str(name) if name else None,
@@ -191,11 +225,10 @@ class QueryExecutor:
         return data, False
 
     def _execute_find_applicable_standards(self, params: dict[str, Any], plan: QueryPlan) -> tuple[list[dict[str, Any]], bool]:
-        product_name = params.get("product") or params.get("product_name") or params.get("product_type")
+        product_name = params.get("product") or params.get("product_name") or params.get("product_type") or (plan.normalized_query if not plan.missing_information else None)
         category = params.get("category")
         std_num = params.get("standard_number") or params.get("is_number")
 
-        # If no search terms exist and missing information was flagged
         if not product_name and not category and not std_num and plan.missing_information:
             return [], True
 
@@ -245,7 +278,7 @@ class QueryExecutor:
             name=str(name) if name else None,
             service_type=str(service_type) if service_type else None,
             keyword=str(keyword) if keyword else None,
-            limit=params.get("limit", 10),
+            limit=params.get("limit", 5),
         )
         return data, False
 

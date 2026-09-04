@@ -1,0 +1,70 @@
+type: collection.insomnia.rest/5.0
+schema_version: "5.1"
+name: BIS intelligent assistant
+meta:
+  id: wrk_b2bc2cddbf8b4302978ae4ab71e444ee
+  created: 1788172068928
+  modified: 1788172068928
+  description: ""
+collection:
+  - url: http://127.0.0.1:5000/v1/query
+    name: Query route
+    meta:
+      id: req_36ac0cd6615a419db51c2af9252463b5
+      created: 1788172075127
+      modified: 1788515118867
+      isPrivate: false
+      description: ""
+      sortKey: -1788172075127
+    method: POST
+    body:
+      mimeType: application/json
+      text: >-
+        {
+        	"message": {
+        		"content":"What laboratories can help me get the BIS certificate for my cables business?",
+        		"language": "hi"
+        	}
+        }
+    headers:
+      - name: Content-Type
+        value: application/json
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://127.0.0.1:5000/v1/health
+    name: Health route
+    meta:
+      id: req_894d4761d1444ffc8cc69387b7f55892
+      created: 1788172194699
+      modified: 1788172377489
+      isPrivate: false
+      description: ""
+      sortKey: -1788172194699
+    method: GET
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_19b84cf58afe5aef56e2fdd5d15e128c4dbfc432
+    created: 1788172068934
+    modified: 1788172068934
+environments:
+  name: Base Environment
+  meta:
+    id: env_19b84cf58afe5aef56e2fdd5d15e128c4dbfc432
+    created: 1788172068931
+    modified: 1788172068931
+    isPrivate: false

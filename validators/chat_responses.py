@@ -138,14 +138,6 @@ class StandardCard(BaseModel):
         ),
     )
 
-    applicable_when: str | None = Field(
-        default=None,
-        description=(
-            "Context-specific explanation of when the standard "
-            "may apply to the user's query."
-        ),
-    )
-
     source_url: HttpUrl
 
     document_url: HttpUrl | None = None

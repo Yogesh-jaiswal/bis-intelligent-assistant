@@ -1,7 +1,17 @@
 import logging
 
 from PIL import Image
-import pytesseract
+
+# pytesseract is an optional runtime dependency.
+# The app can start and serve requests without it; OCR is only needed
+# when processing scanned-image PDFs.  Importing lazily prevents a
+# ModuleNotFoundError at application startup / migration time.
+try:
+    import pytesseract as _pytesseract
+    _TESSERACT_AVAILABLE = True
+except ImportError:  # pragma: no cover
+    _pytesseract = None
+    _TESSERACT_AVAILABLE = False
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -14,13 +24,19 @@ class OCR:
         :param img: Pillow image object
         :return: Extracted text as a string
         """
+        if not _TESSERACT_AVAILABLE:
+            logger.warning(
+                "pytesseract is not installed — OCR skipped. "
+                "Install tesseract-ocr and pytesseract to enable OCR for scanned PDFs."
+            )
+            return ""
         try:
-            text = pytesseract.image_to_string(
+            text = _pytesseract.image_to_string(
                 img,
-                lang = "eng+hin",
-                config = "--oem 3 psm 6"
+                lang="eng+hin",
+                config="--oem 3 psm 6"
             )
             return text.strip()
         except Exception:
-            logger.exception(f"OCR failed")
-            return ""
+            logger.exception("OCR failed")
+            return ""

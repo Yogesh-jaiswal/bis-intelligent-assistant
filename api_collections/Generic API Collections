@@ -1,0 +1,145 @@
+{
+	"log": {
+		"version": "1.2",
+		"creator": {
+			"name": "Insomnia REST Client",
+			"version": "insomnia.desktop.app:v13.2.0"
+		},
+		"entries": [
+			{
+				"startedDateTime": "2026-09-04T11:59:25.649Z",
+				"time": 30.146,
+				"request": {
+					"method": "GET",
+					"url": "http://127.0.0.1:5000/v1/health",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [],
+					"headers": [],
+					"queryString": [],
+					"postData": {
+						"mimeType": "",
+						"text": ""
+					},
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"response": {
+					"status": 200,
+					"statusText": "OK",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [],
+					"headers": [
+						{
+							"name": "Server",
+							"value": "Werkzeug/3.1.8 Python/3.13.13"
+						},
+						{
+							"name": "Date",
+							"value": "Wed, 02 Sep 2026 11:21:48 GMT"
+						},
+						{
+							"name": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"name": "Content-Length",
+							"value": "85"
+						},
+						{
+							"name": "X-Request-ID",
+							"value": "fc867186"
+						},
+						{
+							"name": "X-RateLimit-Limit",
+							"value": "50"
+						},
+						{
+							"name": "X-RateLimit-Remaining",
+							"value": "49"
+						},
+						{
+							"name": "X-RateLimit-Reset",
+							"value": "1788351709"
+						},
+						{
+							"name": "Retry-After",
+							"value": "3600"
+						},
+						{
+							"name": "Connection",
+							"value": "close"
+						}
+					],
+					"content": {
+						"size": 85,
+						"mimeType": "application/json",
+						"text": "{\n  \"data\": \"BIS Intelligent agent is healthy\",\n  \"error\": null,\n  \"success\": true\n}\n"
+					},
+					"redirectURL": "",
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"cache": {},
+				"timings": {
+					"blocked": -1,
+					"dns": -1,
+					"connect": -1,
+					"send": 0,
+					"wait": 30.146,
+					"receive": 0,
+					"ssl": -1
+				},
+				"comment": "Health route"
+			},
+			{
+				"startedDateTime": "2026-09-04T11:59:25.649Z",
+				"time": 0,
+				"request": {
+					"method": "POST",
+					"url": "http://127.0.0.1:5000/v1/query",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [],
+					"headers": [
+						{
+							"name": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"queryString": [],
+					"postData": {
+						"mimeType": "application/json",
+						"text": "{\n\t\"message\": {\n\t\t\"content\":\"What laboratories can help me get the BIS certificate for my cables business?\",\n\t\t\"language\": \"hi\"\n\t}\n}"
+					},
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"response": {
+					"status": 0,
+					"statusText": "Error",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [],
+					"headers": [],
+					"content": {
+						"size": 0,
+						"mimeType": "",
+						"text": ""
+					},
+					"redirectURL": "",
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"cache": {},
+				"timings": {
+					"blocked": -1,
+					"dns": -1,
+					"connect": -1,
+					"send": 0,
+					"wait": 0,
+					"receive": 0,
+					"ssl": -1
+				},
+				"comment": "Query route"
+			}
+		]
+	}
+}

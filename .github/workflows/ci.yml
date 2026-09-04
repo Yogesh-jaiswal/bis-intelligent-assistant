@@ -1,0 +1,63 @@
+name: CI
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  feature-tests:
+    name: Feature Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: bis_assistant
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      AI_PROVIDER: FAKE
+      MODEL_URL: http://localhost:11434
+      MODEL_NAME: qwen3:8b
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: bis_assistant
+      RATELIMIT_ENABLED: "false"
+      FLASK_APP: app.factory:create_app
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Database Migrations
+        run: |
+          flask db upgrade
+
+      - name: Run Feature Tests Only
+        run: |
+          # CI runs feature tests with AI_PROVIDER=FAKE.
+          # tests/e2e is strictly excluded as it requires a live GPU Ollama server.
+          pytest tests/features/ -v

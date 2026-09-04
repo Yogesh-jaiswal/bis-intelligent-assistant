@@ -11,7 +11,9 @@ class FakeProvider:
         self,
         prompt: str,
         response_schema: type[BaseModel],
-        generation_options: dict[str, Any] | None = None
+        generation_options: dict[str, Any] | None = None,
+        *args: Any,
+        **kwargs: Any,
     ) -> dict[str, Any]:
 
         generation_options = generation_options or {}

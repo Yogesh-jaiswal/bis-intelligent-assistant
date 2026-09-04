@@ -1,0 +1,284 @@
+{
+  "run": {
+    "started_at": "2026-09-04T10:28:12.694833+00:00",
+    "finished_at": "2026-09-04T10:32:33.914150+00:00",
+    "duration_ms": 261219.31,
+    "status": "passed",
+    "configuration": {
+      "ai_provider": "OLLAMA",
+      "model_url": "https://registration-bands-pmid-watershed.trycloudflare.com",
+      "model_name": "qwen3:8b",
+      "postgres_host": "127.0.0.1",
+      "postgres_port": 5432,
+      "postgres_db": "bis_assistant",
+      "api_host": "0.0.0.0",
+      "api_port": 5000
+    },
+    "ollama_available": true,
+    "postgres_available": true,
+    "migrations_ok": true,
+    "api_server_available": true
+  },
+  "conversations": [
+    {
+      "name": "general_services_and_laboratories",
+      "description": "Validates structured DB retrieval for BIS services and follow-up lab inquiries.",
+      "conversation_id": "conv_3543098ca1",
+      "status": "passed",
+      "questions": [
+        {
+          "question": "What services does BIS provide?",
+          "specification": {
+            "text": "What services does BIS provide?",
+            "description": "Structured lookup for BIS services; expects ServiceCards, no standard citations.",
+            "expected_intent_hint": "BIS_SERVICE_LOOKUP",
+            "expect_data_cards": true,
+            "expect_citations": false,
+            "language": "en"
+          },
+          "conversation_id_before": null,
+          "conversation_id_after": "conv_3543098ca1",
+          "started_at": "2026-09-04T10:28:49.753481+00:00",
+          "completed_at": "2026-09-04T10:29:14.907446+00:00",
+          "latency_ms": 25153.84,
+          "http_status": 200,
+          "status": "PASS",
+          "success": true,
+          "message_type": "answer",
+          "message": "The Bureau of Indian Standards (BIS) provides several certification and registration services, including: (1) Grant of BIS Product Certification Licence (ISI Mark) for domestic manufacturers, (2) Renewal of BIS Product Certification Licence, (3) Grant of BIS Licence under Foreign Manufacturers Certification Scheme (FMCS) for foreign manufacturers, (4) Compulsory Registration of Electronics and IT Goods (CRS), and (5) BIS Hallmarking Registration for jewellers. These services ensure compliance with Indian Standards and enable the use of the ISI Mark or BIS Hallmark on products. For more details, visit the respective BIS service pages.",
+          "citation_count": 0,
+          "data_card_count": 5,
+          "warnings": [],
+          "error": null
+        },
+        {
+          "question": "Does BIS operate testing laboratories for these services?",
+          "specification": {
+            "text": "Does BIS operate testing laboratories for these services?",
+            "description": "Follow-up on laboratory operations testing conversation continuity.",
+            "expected_intent_hint": "LABORATORY_LOOKUP",
+            "expect_data_cards": false,
+            "expect_citations": false,
+            "language": "en"
+          },
+          "conversation_id_before": "conv_3543098ca1",
+          "conversation_id_after": "conv_3543098ca1",
+          "started_at": "2026-09-04T10:29:15.907830+00:00",
+          "completed_at": "2026-09-04T10:29:35.174647+00:00",
+          "latency_ms": 19266.74,
+          "http_status": 200,
+          "status": "PASS",
+          "success": true,
+          "message_type": "answer",
+          "message": "Yes, BIS operates testing laboratories for its certification services. Testing is conducted by BIS-recognised or accredited laboratories, which are involved in issuing test reports for product certification under schemes such as ISI Mark, FMCS, CRS, and Hallmarking. These laboratories play a key role in verifying compliance with relevant Indian Standards.",
+          "citation_count": 0,
+          "data_card_count": 5,
+          "warnings": [],
+          "error": null
+        },
+        {
+          "question": "What are the fee requirements or eligibility for product certification?",
+          "specification": {
+            "text": "What are the fee requirements or eligibility for product certification?",
+            "description": "Follow-up inquiry about certification service details.",
+            "expected_intent_hint": "BIS_SERVICE_LOOKUP",
+            "expect_data_cards": false,
+            "expect_citations": false,
+            "language": "en"
+          },
+          "conversation_id_before": "conv_3543098ca1",
+          "conversation_id_after": "conv_3543098ca1",
+          "started_at": "2026-09-04T10:29:36.175489+00:00",
+          "completed_at": "2026-09-04T10:29:57.290912+00:00",
+          "latency_ms": 21115.27,
+          "http_status": 200,
+          "status": "PASS",
+          "success": true,
+          "message_type": "answer",
+          "message": "Product certification under BIS is generally voluntary, but it is mandatory for certain products as per Quality Control Orders (QCOs) issued by the Government of India, such as electrical cables and wires under IS 694 and IS 1554. Certification is conducted through BIS-recognised and accredited laboratories under conformity assessment schemes like Scheme-I and FMCS. For eligibility, products must conform to applicable Indian Standards, and the manufacturer must submit a certificate of conformity or supplier certificate. Specific fees and procedures are determined based on the product and scheme.",
+          "citation_count": 3,
+          "data_card_count": 0,
+          "warnings": [],
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "certification_process_and_multilingual",
+      "description": "Validates Scheme I certification process, follow-up continuity, and Hindi response synthesis.",
+      "conversation_id": "conv_6fe18253d1",
+      "status": "passed",
+      "questions": [
+        {
+          "question": "What is the certification process for obtaining an ISI mark under Scheme I?",
+          "specification": {
+            "text": "What is the certification process for obtaining an ISI mark under Scheme I?",
+            "description": "Queries certification procedure under Scheme I.",
+            "expected_intent_hint": "CERTIFICATION_PROCESS",
+            "expect_data_cards": false,
+            "expect_citations": false,
+            "language": "en"
+          },
+          "conversation_id_before": null,
+          "conversation_id_after": "conv_6fe18253d1",
+          "started_at": "2026-09-04T10:29:58.291207+00:00",
+          "completed_at": "2026-09-04T10:30:12.354600+00:00",
+          "latency_ms": 14063.29,
+          "http_status": 200,
+          "status": "PASS",
+          "success": true,
+          "message_type": "answer",
+          "message": "The certification process for obtaining an ISI mark under Scheme I involves Indian manufacturers applying for a licence to use the Standard Mark (ISI Mark) on products that conform to relevant Indian Standards. This scheme is mandatory for products under Quality Control Orders (QCOs) and covers a wide range of products including electrical, construction, food, and mechanical items. The certification is administered by the Bureau of Indian Standards (BIS).",
+          "citation_count": 0,
+          "data_card_count": 1,
+          "warnings": [],
+          "error": null
+        },
+        {
+          "question": "Is this certification mandatory or voluntary for manufacturers?",
+          "specification": {
+            "text": "Is this certification mandatory or voluntary for manufacturers?",
+            "description": "Contextual follow-up regarding mandatory order applicability.",
+            "expected_intent_hint": "CERTIFICATION_REQUIREMENT",
+            "expect_data_cards": false,
+            "expect_citations": false,
+            "language": "en"
+          },
+          "conversation_id_before": "conv_6fe18253d1",
+          "conversation_id_after": "conv_6fe18253d1",
+          "started_at": "2026-09-04T10:30:13.355210+00:00",
+          "completed_at": "2026-09-04T10:30:40.709851+00:00",
+          "latency_ms": 27354.49,
+          "http_status": 200,
+          "status": "PASS",
+          "success": true,
+          "message_type": "answer",
+          "message": "The certification under Scheme-I (ISI Mark) is **mandatory** for domestic manufacturers of products such as PVC insulated cables, steel wire rods, ordinary Portland cement, structural steel, TMT bars, packaged drinking water, LPG cylinders, and domestic pressure cookers. This requirement is enforced under the Quality Control Order (QCO) by the Bureau of Indian Standards (BIS).",
+          "citation_count": 0,
+          "data_card_count": 3,
+          "warnings": [],
+          "error": null
+        },
+        {
+          "question": "आईएसआई मार्क प्राप्त करने की क्या प्रक्रिया है?",
+          "specification": {
+            "text": "आईएसआई मार्क प्राप्त करने की क्या प्रक्रिया है?",
+            "description": "Multilingual Hindi query validating language detection and Hindi synthesis.",
+            "expected_intent_hint": "CERTIFICATION_PROCESS",
+            "expect_data_cards": false,
+            "expect_citations": false,
+            "language": "hi"
+          },
+          "conversation_id_before": "conv_6fe18253d1",
+          "conversation_id_after": "conv_6fe18253d1",
+          "started_at": "2026-09-04T10:30:41.710535+00:00",
+          "completed_at": "2026-09-04T10:31:30.282390+00:00",
+          "latency_ms": 48571.76,
+          "http_status": 200,
+          "status": "PASS",
+          "success": true,
+          "message_type": "answer",
+          "message": "आईएसआई मार्क प्राप्त करने की प्रक्रिया बुरे ऑफ इंडियन स्टैंडर्ड्स (BIS) के बिजली उत्पाद प्रमाणन योजना (Scheme-I) के अंतर्गत होती है। इस योजना के अंतर्गत भारतीय निर्माता उत्पादों पर आईएसआई मार्क लगाने के लिए अपने उत्पादों के अनुरूपता के लिए प्रमाणन प्राप्त कर सकते हैं। यह प्रमाणन विभिन्न उत्पादों, जैसे बिजली, निर्माण, खाद्य और यांत्रिक उत्पादों के लिए आवश्यक होता है। आईएसआई मार्क के लिए आवेदन करने के लिए आपको बिजली उत्पाद प्रमाणन योजना के अंतर्गत आवेदन करना होगा।",
+          "citation_count": 0,
+          "data_card_count": 1,
+          "warnings": [],
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "technical_standards_and_rag",
+      "description": "Validates standard identification, technical testing RAG retrieval, and general BIS query.",
+      "conversation_id": "conv_650c7b345b",
+      "status": "passed",
+      "questions": [
+        {
+          "question": "What is the Indian Standard for packaged drinking water?",
+          "specification": {
+            "text": "What is the Indian Standard for packaged drinking water?",
+            "description": "Product-to-standard mapping query (IS 14543).",
+            "expected_intent_hint": "PRODUCT_STANDARD_RECOMMENDATION",
+            "expect_data_cards": true,
+            "expect_citations": false,
+            "language": "en"
+          },
+          "conversation_id_before": null,
+          "conversation_id_after": "conv_650c7b345b",
+          "started_at": "2026-09-04T10:31:31.282968+00:00",
+          "completed_at": "2026-09-04T10:31:49.630288+00:00",
+          "latency_ms": 18347.19,
+          "http_status": 200,
+          "status": "PASS",
+          "success": true,
+          "message_type": "answer",
+          "message": "The Indian Standard for packaged drinking water is IS 14543:2024, titled 'Packaged Drinking Water (Other than Packaged Natural Mineral Water) — Specification'. This standard outlines safety and quality requirements for packaged drinking water and is currently active. For more details, refer to the official BIS documentation at [https://standards.bis.gov.in/website/know-your-standards](https://standards.bis.gov.in/website/know-your-standards).",
+          "citation_count": 0,
+          "data_card_count": 1,
+          "warnings": [],
+          "error": null
+        },
+        {
+          "question": "What are the key testing requirements specified in the standard for packaged drinking water?",
+          "specification": {
+            "text": "What are the key testing requirements specified in the standard for packaged drinking water?",
+            "description": "Documentary RAG query over standard PDF, expects citations.",
+            "expected_intent_hint": "TESTING_REQUIREMENT",
+            "expect_data_cards": false,
+            "expect_citations": true,
+            "language": "en"
+          },
+          "conversation_id_before": "conv_650c7b345b",
+          "conversation_id_after": "conv_650c7b345b",
+          "started_at": "2026-09-04T10:31:50.630878+00:00",
+          "completed_at": "2026-09-04T10:32:13.216497+00:00",
+          "latency_ms": 22585.52,
+          "http_status": 200,
+          "status": "PASS",
+          "success": true,
+          "message_type": "answer",
+          "message": "The key testing requirements for packaged drinking water are specified in IS 14543:2024, which outlines the methods of sampling and testing to ensure compliance with safety and quality standards <cit_1>. The standard mandates that packaged drinking water must meet the requirements detailed in sections 5.2.1 to 5.2.9. It also includes a sampling plan for testing purposes.",
+          "citation_count": 1,
+          "data_card_count": 1,
+          "warnings": [],
+          "error": null
+        },
+        {
+          "question": "What is BIS and what is its primary role in India?",
+          "specification": {
+            "text": "What is BIS and what is its primary role in India?",
+            "description": "General institutional overview query.",
+            "expected_intent_hint": "GENERAL_BIS_QUERY",
+            "expect_data_cards": false,
+            "expect_citations": false,
+            "language": "en"
+          },
+          "conversation_id_before": "conv_650c7b345b",
+          "conversation_id_after": "conv_650c7b345b",
+          "started_at": "2026-09-04T10:32:14.217161+00:00",
+          "completed_at": "2026-09-04T10:32:33.760373+00:00",
+          "latency_ms": 19543.11,
+          "http_status": 200,
+          "status": "PASS",
+          "success": true,
+          "message_type": "answer",
+          "message": "The Bureau of Indian Standards (BIS) is a statutory institution established under the Bureau of Indian Standards Act, 2016. Its primary role is to promote harmonious development of the activities of standardization, conformity assessment, quality assurance, marking, and product certification in India. BIS serves as the National Standards Body of India, ensuring that goods meet specified quality and safety standards <cit_4>.",
+          "citation_count": 4,
+          "data_card_count": 0,
+          "warnings": [],
+          "error": null
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_conversations": 3,
+    "passed_conversations": 3,
+    "failed_conversations": 0,
+    "total_questions": 9,
+    "passed_questions": 9,
+    "failed_questions": 0,
+    "average_latency_ms": 24000.13,
+    "min_latency_ms": 14063.29,
+    "max_latency_ms": 48571.76
+  }
+}

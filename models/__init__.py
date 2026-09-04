@@ -12,6 +12,7 @@ from .laboratory import Laboratory
 from .standard_certification import StandardCertification
 from .product_standard_mapping import ProductStandardMapping
 from .service import Service
+from .conversation import Conversation
 
 __all__ = [
     "DocumentBlockType",
@@ -28,4 +29,5 @@ __all__ = [
     "StandardCertification",
     "ProductStandardMapping",
     "Service",
+    "Conversation",
 ]

@@ -1,0 +1,24 @@
+[
+  {
+    "source_id": "web_about_bis",
+    "original_url": "https://www.bis.gov.in/about-bis/",
+    "final_url": "https://www.bis.gov.in/about-bis/",
+    "fetched_at": "2026-08-31T00:00:00+00:00",
+    "status": "success",
+    "http_status": 200,
+    "title": "About Bureau of Indian Standards (BIS) — Overview & Mandate",
+    "content_path": "data/web/web_about_bis.html",
+    "reason": null
+  },
+  {
+    "source_id": "web_product_certification",
+    "original_url": "https://www.bis.gov.in/product-certification/",
+    "final_url": "https://www.bis.gov.in/product-certification/",
+    "fetched_at": "2026-08-31T00:00:00+00:00",
+    "status": "success",
+    "http_status": 200,
+    "title": "BIS Product Certification Scheme — Overview & Requirements",
+    "content_path": "data/web/web_product_certification.html",
+    "reason": null
+  }
+]

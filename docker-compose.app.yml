@@ -1,0 +1,30 @@
+services:
+  app:
+    image: bis-assistant-app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+      args:
+        INSTALL_OCR: "true"
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-bis_assistant}
+      - MODEL_URL=${MODEL_URL:-http://host.docker.internal:11434}
+      - MODEL_NAME=${MODEL_NAME:-qwen3:8b}
+      - AI_PROVIDER=${AI_PROVIDER:-OLLAMA}
+      - DEBUG=${DEBUG:-false}
+      - HOST=0.0.0.0
+      - PORT=5000
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./data:/app/data
+      - ./file_uploads:/app/file_uploads
+      - ./logs:/app/logs

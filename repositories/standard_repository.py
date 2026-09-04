@@ -7,6 +7,7 @@ from models.standard import Standard
 from models.standard_version import StandardVersion
 from models.standard_amendment import StandardAmendment
 from exceptions import DatabaseError
+from repositories.semantic_search import rank_entities_semantically
 
 logger = logging.getLogger(__name__)
 
@@ -37,15 +38,17 @@ class StandardRepository:
         status: str | None = None,
         technical_department: str | None = None,
         limit: int = 10,
+        enable_semantic: bool = True,
     ) -> list[dict[str, Any]]:
         """
-        Search for Indian Standards matching the given criteria.
+        Search for Indian Standards matching the given criteria with semantic fallback.
 
         :param standard_number: IS number or substring (e.g., 'IS 694', '694', 'IS 694:2010').
         :param title: Keyword or phrase in standard title.
         :param status: Standard status (e.g., 'Active', 'Withdrawn').
         :param technical_department: Department name or code (e.g., 'ETD').
         :param limit: Maximum number of records to return (capped at 50).
+        :param enable_semantic: Enable semantic matching when title search returns few records.
         :return: List of serialized standard dictionaries.
         """
         try:
@@ -71,12 +74,29 @@ class StandardRepository:
             safe_limit = min(max(1, limit), 50)
             stmt = stmt.order_by(Standard.publication_year.desc().nullslast(), Standard.id.asc()).limit(safe_limit)
 
-            standards = db.session.scalars(stmt).all()
+            standards = list(db.session.scalars(stmt).all())
+            seen_ids = {s.id for s in standards}
+
+            # Semantic fallback for conceptual/topic queries if exact title yields few results
+            if enable_semantic and title and len(standards) < safe_limit:
+                all_standards = list(db.session.scalars(select(Standard)).all())
+                ranked = rank_entities_semantically(
+                    query=title,
+                    entities=all_standards,
+                    text_extractor=lambda s: f"{s.is_number} {s.title} {s.technical_department or ''}",
+                    limit=safe_limit - len(standards),
+                )
+                for _score, std in ranked:
+                    if std.id not in seen_ids:
+                        standards.append(std)
+                        seen_ids.add(std.id)
+
             return [_standard_to_dict(s) for s in standards]
 
         except Exception as e:
             logger.exception("Failed to query standards from database")
             raise DatabaseError("Failed to query standards from database") from e
+
 
     @staticmethod
     def get_standard_by_is_number(is_number: str) -> dict[str, Any] | None:

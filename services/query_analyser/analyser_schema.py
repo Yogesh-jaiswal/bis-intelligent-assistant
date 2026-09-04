@@ -53,6 +53,11 @@ class QueryPlan(BaseModel):
         description="Classified user intent for domain routing."
     )
 
+    secondary_intents: list[QueryIntent] = Field(
+        default_factory=list,
+        description="Any secondary or co-occurring intents in a multi-part query (e.g., both applicable standard and mandatory certification)."
+    )
+
     response_language: str = Field(
         default="en",
         description="ISO 639-1 language code or language name for the final response to match the user's language (e.g., 'en', 'hi')."
@@ -95,6 +100,14 @@ class QueryPlan(BaseModel):
             # If not relevant or not needs_db, ensure db_operations is empty
             if not data.get("relevant", True) or not data.get("needs_db", False):
                 data["db_operations"] = []
+
+            # Handle secondary_intents normalization if null or single item
+            if "secondary_intents" in data:
+                si = data.get("secondary_intents")
+                if si is None:
+                    data["secondary_intents"] = []
+                elif isinstance(si, (str, QueryIntent)):
+                    data["secondary_intents"] = [si]
 
         return data
 

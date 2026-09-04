@@ -12,6 +12,9 @@ class RetrievedChunk:
     filename: str
     author: str | None
     source_type: DocumentTypes
+    source_url: str | None
+    """Authoritative external URL from Upload.source_url. None when not available."""
+
 
 
 @dataclass

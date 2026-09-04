@@ -28,10 +28,11 @@ class ProductStandardMapping(db.Model):
     )
 
     relevance: Mapped[str | None] = mapped_column(
-        db.String(50),
+        db.Text,
         nullable=True,
         default="Primary"
     )
+
 
     source_url: Mapped[str | None] = mapped_column(
         db.Text,

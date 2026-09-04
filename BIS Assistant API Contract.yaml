@@ -952,18 +952,6 @@ components:
             - Related
 
 
-        applicable_when:
-          type: string
-          nullable: true
-
-          description: |
-            Query-specific explanation describing when the
-            returned standard may apply.
-
-            This can be generated from retrieved database records,
-            mappings, and/or authoritative RAG documents.
-
-
         # --------------------------------------------------------
         # CERTIFICATION FIELDS
         # --------------------------------------------------------

@@ -39,6 +39,14 @@ class Upload(db.Model):
         nullable=True
     )
 
+    source_url: Mapped[str | None] = mapped_column(
+        db.Text,
+        nullable=True
+    )
+    """Authoritative external URL for this document (e.g. verified BIS page).
+    Null when no reliable URL is known. Never use a generic homepage as fallback.
+    """
+
     created_at: Mapped[datetime] = mapped_column(
         db.DateTime(timezone=True),
         server_default=func.now(),

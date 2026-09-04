@@ -1,0 +1,142 @@
+[
+  {
+    "id": "Q01",
+    "query": "What is IS 694:2010?",
+    "category": "Direct standard lookup",
+    "expected_intent": "STANDARD_LOOKUP",
+    "clarification_expected": false,
+    "expected_retrieval_operations": ["FIND_STANDARD"],
+    "expected_evidence": "Standard record for IS 694 with title 'PVC Insulated Cables For Working Voltages Up To And Including 1100 V'",
+    "answerable_with_current_data": true
+  },
+  {
+    "id": "Q02",
+    "query": "Which standard applies to PVC insulated electrical cables?",
+    "category": "Product -> standard lookup",
+    "expected_intent": "PRODUCT_STANDARD_RECOMMENDATION",
+    "clarification_expected": false,
+    "expected_retrieval_operations": ["FIND_APPLICABLE_STANDARDS"],
+    "expected_evidence": "IS 694 mapped via ProductStandardMapping",
+    "answerable_with_current_data": true
+  },
+  {
+    "id": "Q03",
+    "query": "Is BIS certification mandatory for cables under IS 694?",
+    "category": "Certification questions",
+    "expected_intent": "CERTIFICATION_REQUIREMENT",
+    "clarification_expected": false,
+    "expected_retrieval_operations": ["GET_CERTIFICATION_REQUIREMENT"],
+    "expected_evidence": "Certification scheme record showing mandatory certification under Scheme-I",
+    "answerable_with_current_data": true
+  },
+  {
+    "id": "Q04",
+    "query": "Where can I test electrical cables in laboratories?",
+    "category": "Laboratory questions",
+    "expected_intent": "LABORATORY_LOOKUP",
+    "clarification_expected": false,
+    "expected_retrieval_operations": ["FIND_LABORATORIES"],
+    "expected_evidence": "Recognized testing laboratories with scope for electrical cables",
+    "answerable_with_current_data": true
+  },
+  {
+    "id": "Q05",
+    "query": "What are the services offered by BIS?",
+    "category": "Service listing",
+    "expected_intent": "BIS_SERVICE_LOOKUP",
+    "clarification_expected": false,
+    "expected_retrieval_operations": ["GET_BIS_SERVICE"],
+    "expected_evidence": "List of BIS services including product certification, hallmarking, and lab testing",
+    "answerable_with_current_data": true
+  },
+  {
+    "id": "Q06",
+    "query": "What is BIS and what does it do?",
+    "category": "General BIS information",
+    "expected_intent": "GENERAL_BIS_QUERY",
+    "clarification_expected": false,
+    "expected_retrieval_operations": ["needs_rag"],
+    "expected_evidence": "Authoritative documentary passages from BIS Overview document",
+    "answerable_with_current_data": true
+  },
+  {
+    "id": "Q07",
+    "query": "For my cables business, do I need BIS certification and do I need to test it in laboratories?",
+    "category": "Multi-hop questions",
+    "expected_intent": "PRODUCT_STANDARD_RECOMMENDATION",
+    "clarification_expected": false,
+    "expected_retrieval_operations": ["FIND_APPLICABLE_STANDARDS", "GET_CERTIFICATION_REQUIREMENT", "FIND_LABORATORIES"],
+    "expected_evidence": "Applicable standards (IS 694/IS 1554) -> Certification Scheme-I -> Testing laboratory records",
+    "answerable_with_current_data": true
+  },
+  {
+    "id": "Q08",
+    "query": "Which BIS standard do I need for cables?",
+    "category": "Ambiguous product questions",
+    "expected_intent": "PRODUCT_STANDARD_RECOMMENDATION",
+    "clarification_expected": true,
+    "expected_retrieval_operations": ["FIND_APPLICABLE_STANDARDS"],
+    "expected_evidence": "Multiple candidate cable standards returned (IS 694 up to 1100V, IS 7098 cross-linked, IS 1554 heavy duty)",
+    "answerable_with_current_data": true
+  },
+  {
+    "id": "Q09",
+    "query": "What is the standard for high voltage cables?",
+    "category": "Queries containing technical identifiers",
+    "expected_intent": "PRODUCT_STANDARD_RECOMMENDATION",
+    "clarification_expected": false,
+    "expected_retrieval_operations": ["FIND_APPLICABLE_STANDARDS"],
+    "expected_evidence": "IS 7098 / IS 1554 for higher voltage cables",
+    "answerable_with_current_data": true
+  },
+  {
+    "id": "Q10",
+    "query": "What is the weather in Delhi today?",
+    "category": "Queries where no relevant evidence exists",
+    "expected_intent": "OUT_OF_SCOPE",
+    "clarification_expected": false,
+    "expected_retrieval_operations": [],
+    "expected_evidence": "Out of scope response stating assistant domain",
+    "answerable_with_current_data": true
+  },
+  {
+    "id": "Q11",
+    "query": "flexible wires for domestic home wiring",
+    "category": "Queries using wording different from database terminology",
+    "expected_intent": "PRODUCT_STANDARD_RECOMMENDATION",
+    "clarification_expected": false,
+    "expected_retrieval_operations": ["FIND_APPLICABLE_STANDARDS", "FIND_PRODUCT"],
+    "expected_evidence": "Semantic discovery matching PVC insulated cables / flexible cords (IS 694)",
+    "answerable_with_current_data": true
+  },
+  {
+    "id": "Q12",
+    "query": "क्या केबल के लिए BIS सर्टिफिकेशन जरूरी है?",
+    "category": "Hindi/localized queries",
+    "expected_intent": "CERTIFICATION_REQUIREMENT",
+    "clarification_expected": false,
+    "expected_retrieval_operations": ["FIND_APPLICABLE_STANDARDS", "GET_CERTIFICATION_REQUIREMENT"],
+    "expected_evidence": "Normalized English query -> Standard and Certification records -> Localized Hindi response preserving IS 694 and Scheme-I",
+    "answerable_with_current_data": true
+  },
+  {
+    "id": "Q13",
+    "query": "What is the difference between IS 694 and IS 1554 for power cables?",
+    "category": "Queries combining multiple intents",
+    "expected_intent": "TECHNICAL_QUESTION",
+    "clarification_expected": false,
+    "expected_retrieval_operations": ["FIND_STANDARD", "needs_rag"],
+    "expected_evidence": "Standard records and clause comparison for working voltage thresholds (1100V vs higher heavy duty ratings)",
+    "answerable_with_current_data": true
+  },
+  {
+    "id": "Q14",
+    "query": "What testing is required?",
+    "category": "Queries requiring clarification",
+    "expected_intent": "TESTING_REQUIREMENT",
+    "clarification_expected": true,
+    "expected_retrieval_operations": ["FIND_STANDARD"],
+    "expected_evidence": "Clarification question asking for product or standard number",
+    "answerable_with_current_data": true
+  }
+]

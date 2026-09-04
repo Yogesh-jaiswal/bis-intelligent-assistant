@@ -246,7 +246,7 @@ def test_get_bis_service(executor, mock_repos):
         name=None,
         service_type="Product Certification",
         keyword=None,
-        limit=10,
+        limit=5,
     )
 
 
